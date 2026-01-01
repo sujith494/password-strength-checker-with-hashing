@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Password Security Tool</title>
+
+<style>
+:root {
+    --weak: #ff4d4d;
+    --medium: #ffa500;
+    --strong: #2ecc71;
+    --bg: #0f172a;
+    --card: #111827;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #0f172a, #020617);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    background: var(--card);
+    width: 380px;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+p {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    margin-top: 15px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    outline: none;
+}
+
+.strength-bar {
+    width: 100%;
+    height: 10px;
+    background: #1f2933;
+    border-radius: 10px;
+    margin-top: 12px;
+    overflow: hidden;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 0.4s;
+}
+
+.strength-text {
+    margin-top: 8px;
+    font-weight: bold;
+    text-align: center;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 18px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+textarea {
+    width: 100%;
+    margin-top: 15px;
+    height: 90px;
+    border-radius: 10px;
+    border: none;
+    padding: 12px;
+    font-size: 13px;
+    resize: none;
+}
+
+footer {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #9ca3af;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>🔐 Password Security</h1>
+    <p>Check strength & generate secure hash</p>
+
+    <input type="password" id="password" placeholder="Enter your password" oninput="checkStrength()">
+
+    <div class="strength-bar">
+        <div class="strength-fill" id="fill"></div>
+    </div>
+
+    <div class="strength-text" id="strengthText"></div>
+
+    <button onclick="generateHash()">Generate Secure Hash</button>
+
+    <textarea id="hashOutput" readonly placeholder="Hashed password will appear here..."></textarea>
+
+    <footer>
+        Cyber Security Final Year Project
+    </footer>
+</div>
+
+<script>
+function checkStrength() {
+    const pwd = document.getElementById("password").value;
+    const fill = document.getElementById("fill");
+    const text = document.getElementById("strengthText");
+
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[a-z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+    if (score <= 2) {
+        fill.style.width = "30%";
+        fill.style.background = "var(--weak)";
+        text.innerHTML = "Weak Password";
+        text.style.color = "var(--weak)";
+    } 
+    else if (score <= 4) {
+        fill.style.width = "65%";
+        fill.style.background = "var(--medium)";
+        text.innerHTML = "Medium Password";
+        text.style.color = "var(--medium)";
+    } 
+    else {
+        fill.style.width = "100%";
+        fill.style.background = "var(--strong)";
+        text.innerHTML = "Strong Password";
+        text.style.color = "var(--strong)";
+    }
+}
+
+async function generateHash() {
+    const pwd = document.getElementById("password").value;
+    if (!pwd) {
+        alert("Please enter a password");
+        return;
+    }
+
+    const encoder = new TextEncoder();
+    const data = encoder.encode(pwd);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join("");
+
+    document.getElementById("hashOutput").value = hashHex;
+}
+</script>
+
+</body>
+</html>
